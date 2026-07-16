@@ -1,0 +1,3 @@
+101|God of War Ragnarok|Action|150|5|Available
+102|Spider-Man 2|Action|180|0|Unavailable
+103|EA Sports FC 26|Sports|120|3|Available
