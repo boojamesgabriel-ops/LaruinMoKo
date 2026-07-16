@@ -1,20 +1,8 @@
 from datetime import date
+from member1 import GENRES
 
 GAMES_FILE = "games.txt"
 RENTALS_FILE = "rentals.txt"  # NEW: stores every rental transaction (Drew's part)
-
-GENRES = [
-    "Adventure",
-    "Role-Playing Games (RPGs)",
-    "Action/Action-Adventure",
-    "Shooter (FPS/TPS)",
-    "Simulation",
-    "Racing",
-    "Fighting",
-    "Puzzle",
-    "Strategy",
-    "Sports",
-]
 
 from member1 import generate_next_id, find_game_by_id_or_name
 
