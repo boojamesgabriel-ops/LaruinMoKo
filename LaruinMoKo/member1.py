@@ -104,18 +104,22 @@ def check_quantity(game_name, game_quantity):
 
 
 def generate_game_id():
-    highest_id = 0
+    return generate_next_id("G", load_games(), "id")
 
-    for game in load_games():
-        game_id = game["id"]
 
-        if game_id.startswith("G") and game_id[1:].isdigit():
-            number = int(game_id[1:])
+def generate_next_id(prefix, items, key_name):
+    """Return next ID with given prefix based on numeric suffix in items[key_name].
 
-            if number > highest_id:
-                highest_id = number
-
-    return f"G{highest_id + 1:03d}"
+    Example: generate_next_id('G', load_games(), 'id') -> 'G001', 'G002', ...
+    """
+    highest = 0
+    for it in items:
+        val = it.get(key_name, "")
+        if isinstance(val, str) and val.startswith(prefix) and val[1:].isdigit():
+            n = int(val[1:])
+            if n > highest:
+                highest = n
+    return f"{prefix}{highest + 1:03d}"
 
 
 def get_positive_float(prompt):
@@ -168,7 +172,7 @@ def add_game():
         print("Game name cannot be blank.")
         game_name = input("Enter the name of the game: ").strip()
 
-    existing_game = find_game_by_name(game_name)
+    existing_game = find_game_by_id_or_name(game_name)
 
     if existing_game:
         print(f"\n{existing_game['name']} already exists.")
@@ -205,11 +209,10 @@ def add_game():
     print(f"The game {game_name} has been added successfully with ID {game_id}!")
 
 
-def find_game_by_name(game_name):
+def find_game_by_id_or_name(search_value):
     for game in load_games():
-        if game["name"].lower() == game_name.lower():
+        if game["id"].lower() == search_value.lower() or game["name"].lower() == search_value.lower():
             return game
-
     return None
 
 
@@ -291,9 +294,6 @@ def menu():
             break
         else:
             print("Invalid choice. Please select from 1 to 5.")
-
-
-addGame = add_game
 
 
 if __name__ == "__main__":

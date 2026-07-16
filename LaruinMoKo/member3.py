@@ -16,6 +16,8 @@ GENRES = [
     "Sports",
 ]
 
+from member1 import generate_next_id, find_game_by_id_or_name
+
 
 # ======================================================
 # GAME FILE HANDLING (Member 1's original functions)
@@ -102,14 +104,7 @@ def check_quantity(game_name, game_quantity):
 
 
 def generate_game_id():
-    highest_id = 0
-    for game in load_games():
-        game_id = game["id"]
-        if game_id.startswith("G") and game_id[1:].isdigit():
-            number = int(game_id[1:])
-            if number > highest_id:
-                highest_id = number
-    return f"G{highest_id + 1:03d}"
+    return generate_next_id("G", load_games(), "id")
 
 
 def get_positive_float(prompt):
@@ -150,7 +145,7 @@ def add_game():
     while not game_name:
         print("Game name cannot be blank.")
         game_name = input("Enter the name of the game: ").strip()
-    existing_game = find_game_by_name(game_name)
+    existing_game = find_game_by_id_or_name(game_name)
     if existing_game:
         print(f"\n{existing_game['name']} already exists.")
         game_quantity = get_positive_int("Enter quantity to add: ")
@@ -180,11 +175,7 @@ def add_game():
     print(f"The game {game_name} has been added successfully with ID {game_id}!")
 
 
-def find_game_by_name(game_name):
-    for game in load_games():
-        if game["name"].lower() == game_name.lower():
-            return game
-    return None
+# Note: `find_game_by_name` was removed to eliminate redundancy.
 
 
 def find_game_by_id_or_name(search_value):
@@ -239,7 +230,7 @@ def search_game():
 
 
 # ======================================================
-# RENTAL FILE HANDLING (Drew's part)
+# RENTAL FILE HANDLING (Dro's part)
 # rentals.txt row format:
 # rental_id,game_id,game_name,renter_name,rent_date,return_date,status
 # return_date is left blank while a game is still rented out.
@@ -285,14 +276,7 @@ def save_rentals(rentals):
 def generate_rental_id():
     # Same pattern as generate_game_id(), but with an "R" prefix so rental IDs
     # are easy to tell apart from game IDs (e.g. R001, R002, ...).
-    highest_id = 0
-    for rental in load_rentals():
-        rental_id = rental["rental_id"]
-        if rental_id.startswith("R") and rental_id[1:].isdigit():
-            number = int(rental_id[1:])
-            if number > highest_id:
-                highest_id = number
-    return f"R{highest_id + 1:03d}"
+    return generate_next_id("R", load_rentals(), "rental_id")
 
 
 def get_non_blank_text(prompt):
@@ -440,8 +424,6 @@ def menu():
         else:
             print("Invalid choice. Please select from 1 to 8.")
 
-
-addGame = add_game
 
 if __name__ == "__main__":
     menu()
