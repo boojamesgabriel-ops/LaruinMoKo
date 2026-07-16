@@ -1,2 +1,0 @@
-1|SpiderMan 2|Action|120|2|Available
-2|Final Fantasy VII|RPG|5.49|0|Unavailable
