@@ -20,7 +20,7 @@ MENU_ACTIONS = {
 
 def print_menu():
     print("\n====================================")
-    print(" PS5 CD RENTAL SYSTEM")
+    print("        PS5 CD RENTAL SYSTEM")
     print("====================================")
     print("1. Add Game")
     print("2. View Game")
