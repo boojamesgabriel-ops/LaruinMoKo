@@ -1,9 +1,11 @@
+# This module connects all project features through one terminal-based main menu.
 from game_catalog import add_game, search_game, view_all_games, view_game
 from game_management import delete_game, edit_game
 from payment import view_payment_records
 from rental_management import rent_game, return_game, view_rental_records
 
 
+# This dictionary maps each menu choice to the function that performs the action.
 MENU_ACTIONS = {
     "1": add_game,
     "2": view_game,
@@ -18,6 +20,7 @@ MENU_ACTIONS = {
 }
 
 
+# This function prints every available operation in the rental system.
 def print_menu():
     print("\n====================================")
     print("        PS5 CD RENTAL SYSTEM")
@@ -35,6 +38,7 @@ def print_menu():
     print("11. Exit")
 
 
+# This function keeps the program running until the user exits or closes the input.
 def main():
     while True:
         print_menu()
@@ -59,5 +63,6 @@ def main():
             print("\nOperation cancelled.")
 
 
+# This block starts the menu only when this file is run directly.
 if __name__ == "__main__":
     main()

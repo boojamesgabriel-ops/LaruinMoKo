@@ -1,8 +1,10 @@
+# This module handles adding, viewing, listing, searching, and validating games.
 from decimal import Decimal, InvalidOperation
 
 import storage
 
 
+# This list provides the valid genres displayed when a game is added.
 GENRES = [
     "Adventure",
     "Role-Playing Games (RPGs)",
@@ -17,6 +19,7 @@ GENRES = [
 ]
 
 
+# This function repeatedly asks for text until it is safe to store in a data file.
 def get_safe_text(prompt, field_name):
     while True:
         value = input(prompt)
@@ -26,6 +29,7 @@ def get_safe_text(prompt, field_name):
             print(error)
 
 
+# This function validates a positive monetary value with at most two decimal places.
 def get_positive_money(prompt):
     while True:
         value = input(prompt).strip()
@@ -35,6 +39,7 @@ def get_positive_money(prompt):
             print(f"Invalid price: {error}")
 
 
+# This function accepts only whole numbers that are zero or greater.
 def get_non_negative_int(prompt):
     while True:
         value = input(prompt).strip()
@@ -47,6 +52,7 @@ def get_non_negative_int(prompt):
             print("Invalid input. Enter a whole number of zero or greater.")
 
 
+# This function accepts only whole numbers greater than zero.
 def get_positive_int(prompt):
     while True:
         quantity = get_non_negative_int(prompt)
@@ -55,6 +61,7 @@ def get_positive_int(prompt):
         print("Quantity must be greater than zero.")
 
 
+# This function displays the genre menu and returns the selected genre.
 def choose_genre():
     print("\nChoose a genre:")
     for index, genre in enumerate(GENRES, start=1):
@@ -67,6 +74,7 @@ def choose_genre():
         print("Invalid genre. Please choose from the numbered list.")
 
 
+# This function displays every field of one game in a readable format.
 def display_game(game):
     print("\nGame ID     :", game["game_id"])
     print("Title       :", game["title"])
@@ -76,6 +84,7 @@ def display_game(game):
     print("Availability:", game["availability"])
 
 
+# This function displays multiple game records in a formatted table.
 def display_games(games):
     if not games:
         print("No games found.")
@@ -97,18 +106,21 @@ def display_games(games):
         )
 
 
+# This function creates the next numeric game ID from the existing records.
 def generate_game_id(games=None):
     if games is None:
         games = storage.load_games()
     return storage.generate_numeric_game_id(games)
 
 
+# This function finds a game using either its exact ID or title.
 def find_game_by_id_or_name(search_value, games=None):
     if games is None:
         games = storage.load_games()
     return storage.find_game(games, search_value)
 
 
+# This function adds a new game or increases the stock of an existing game.
 def add_game():
     try:
         games = storage.load_games()
@@ -137,6 +149,7 @@ def add_game():
         print(f"Unable to add game: {error}")
 
 
+# This function asks for a game ID or title and displays the matching record.
 def view_game():
     try:
         games = storage.load_games()
@@ -150,6 +163,7 @@ def view_game():
         print(f"Unable to view game: {error}")
 
 
+# This function loads and displays the complete game catalog.
 def view_all_games():
     try:
         display_games(storage.load_games())
@@ -157,6 +171,7 @@ def view_all_games():
         print(f"Unable to view games: {error}")
 
 
+# This function searches for games using part of a title or genre.
 def search_game():
     try:
         games = storage.load_games()

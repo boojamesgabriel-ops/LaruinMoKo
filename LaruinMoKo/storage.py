@@ -1,3 +1,4 @@
+# This module validates, reads, and safely writes all project text files.
 from __future__ import annotations
 
 import os
@@ -7,22 +8,27 @@ from pathlib import Path
 from typing import Iterable
 
 
+# These paths keep all data files beside the source code regardless of the current folder.
 BASE_DIR = Path(__file__).resolve().parent
 GAMES_FILE = BASE_DIR / "games.txt"
 RENTALS_FILE = BASE_DIR / "rentals.txt"
 PAYMENTS_FILE = BASE_DIR / "payments.txt"
 
+# This value limits every monetary amount to two decimal places.
 MONEY_PLACES = Decimal("0.01")
 
 
+# This exception reports problems while reading or writing application data.
 class StorageError(Exception):
     pass
 
 
+# This exception reports records that do not follow the required text-file format.
 class DataFormatError(StorageError):
     pass
 
 
+# This function rejects blank text and characters that could corrupt a stored record.
 def validate_text(value, field_name="Value"):
     text = str(value).strip()
     if not text:
@@ -32,6 +38,7 @@ def validate_text(value, field_name="Value"):
     return text
 
 
+# This function converts a value to a finite Decimal with no more than two decimal places.
 def normalize_money(value, *, positive=True):
     try:
         amount = Decimal(str(value))
@@ -49,14 +56,17 @@ def normalize_money(value, *, positive=True):
     return amount.quantize(MONEY_PLACES)
 
 
+# This function formats money with exactly two decimal places for files and displays.
 def format_amount(value):
     return f"{normalize_money(value, positive=False):.2f}"
 
 
+# This function derives a game's availability directly from its current quantity.
 def availability_for(quantity):
     return "Available" if quantity > 0 else "Unavailable"
 
 
+# This function reads pipe-delimited records and verifies their number of fields.
 def _read_records(path: Path, expected_fields: int):
     if not path.exists():
         return []
@@ -82,6 +92,7 @@ def _read_records(path: Path, expected_fields: int):
     return records
 
 
+# This function loads and validates every game record from games.txt.
 def load_games(path=None):
     file_path = Path(path) if path is not None else GAMES_FILE
     games = []
@@ -115,6 +126,7 @@ def load_games(path=None):
     return games
 
 
+# This function loads and validates every rental record from rentals.txt.
 def load_rentals(path=None):
     file_path = Path(path) if path is not None else RENTALS_FILE
     rentals = []
@@ -151,6 +163,7 @@ def load_rentals(path=None):
     return rentals
 
 
+# This function loads and validates every paid transaction from payments.txt.
 def load_payments(path=None):
     file_path = Path(path) if path is not None else PAYMENTS_FILE
     payments = []
@@ -203,6 +216,7 @@ def load_payments(path=None):
     return payments
 
 
+# This function converts game dictionaries into validated pipe-delimited lines.
 def _serialize_games(games):
     lines = []
     for game in games:
@@ -223,6 +237,7 @@ def _serialize_games(games):
     return lines
 
 
+# This function converts rental dictionaries into validated pipe-delimited lines.
 def _serialize_rentals(rentals):
     lines = []
     for rental in rentals:
@@ -247,6 +262,7 @@ def _serialize_rentals(rentals):
     return lines
 
 
+# This function converts successful payment dictionaries into validated file lines.
 def _serialize_payments(payments):
     lines = []
     for payment in payments:
@@ -276,11 +292,13 @@ def _serialize_payments(payments):
     return lines
 
 
+# This function joins serialized records and adds the final newline required by text files.
 def _text_for(lines: Iterable[str]):
     materialized = list(lines)
     return "" if not materialized else "\n".join(materialized) + "\n"
 
 
+# This function writes new data to a temporary file before replacing the real file.
 def _write_temp(path: Path, text: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     handle = tempfile.NamedTemporaryFile(
@@ -303,21 +321,25 @@ def _write_temp(path: Path, text: str):
         raise
 
 
+# This function updates related files together and restores originals if a write fails.
 def _atomic_write_group(files):
     originals = {}
     temporary = {}
     replaced = []
     try:
+        # Prepare every temporary file before changing any original data file.
         for path, text in files.items():
             path = Path(path)
             originals[path] = path.read_bytes() if path.exists() else None
             temporary[path] = _write_temp(path, text)
 
+        # Replace each original only after every temporary file is ready.
         for path, temp_path in temporary.items():
             os.replace(temp_path, path)
             replaced.append(path)
         return True
     except (OSError, ValueError) as error:
+        # Restore any file already replaced so records do not become inconsistent.
         rollback_errors = []
         for path in reversed(replaced):
             try:
@@ -340,10 +362,12 @@ def _atomic_write_group(files):
             detail += " Rollback also failed: " + "; ".join(rollback_errors)
         raise StorageError(detail) from error
     finally:
+        # Remove temporary files whether the save succeeds or fails.
         for temp_path in temporary.values():
             temp_path.unlink(missing_ok=True)
 
 
+# This function safely saves the complete game catalog.
 def save_games(games):
     try:
         return _atomic_write_group({GAMES_FILE: _text_for(_serialize_games(games))})
@@ -351,6 +375,7 @@ def save_games(games):
         raise StorageError(f"Unable to save games.txt: {error}") from error
 
 
+# This function safely saves the complete rental history.
 def save_rentals(rentals):
     try:
         return _atomic_write_group({RENTALS_FILE: _text_for(_serialize_rentals(rentals))})
@@ -358,6 +383,7 @@ def save_rentals(rentals):
         raise StorageError(f"Unable to save rentals.txt: {error}") from error
 
 
+# This function safely saves the complete payment history.
 def save_payments(payments):
     try:
         return _atomic_write_group({PAYMENTS_FILE: _text_for(_serialize_payments(payments))})
@@ -365,6 +391,7 @@ def save_payments(payments):
         raise StorageError(f"Unable to save payments.txt: {error}") from error
 
 
+# This function saves inventory, rental, and payment changes as one transaction.
 def save_rental_transaction(games, rentals, payments):
     try:
         return _atomic_write_group(
@@ -378,6 +405,7 @@ def save_rental_transaction(games, rentals, payments):
         raise StorageError(f"Unable to complete rental: {error}") from error
 
 
+# This function saves the inventory and rental changes produced by a game return.
 def save_return_transaction(games, rentals):
     try:
         return _atomic_write_group(
@@ -390,11 +418,13 @@ def save_return_transaction(games, rentals):
         raise StorageError(f"Unable to complete return: {error}") from error
 
 
+# This function creates the next game ID using the highest numeric ID in the catalog.
 def generate_numeric_game_id(games):
     numeric_ids = [int(game["game_id"]) for game in games if str(game["game_id"]).isdigit()]
     return str(max(numeric_ids, default=100) + 1)
 
 
+# This function creates the next rental or payment ID with a prefix and three digits.
 def generate_prefixed_id(prefix, records, key):
     highest = 0
     for record in records:
@@ -404,6 +434,7 @@ def generate_prefixed_id(prefix, records, key):
     return f"{prefix}{highest + 1:03d}"
 
 
+# This function returns the game whose ID or title exactly matches the search value.
 def find_game(games, search_value):
     search = str(search_value).strip().casefold()
     for game in games:

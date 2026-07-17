@@ -1,6 +1,8 @@
+# This module creates and prints the terminal receipt for a successful payment.
 import storage
 
 
+# This function converts a payment record into a formatted receipt string.
 def format_receipt(payment):
     width = 48
     lines = [
@@ -26,5 +28,6 @@ def format_receipt(payment):
     return "\n".join(lines)
 
 
+# This function prints the completed payment receipt in the terminal.
 def print_receipt(payment):
     print("\n" + format_receipt(payment))
