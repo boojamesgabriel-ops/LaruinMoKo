@@ -1,3 +1,4 @@
+# This module handles renting games, returning games, and viewing rental history.
 from datetime import date
 
 import payment
@@ -6,12 +7,14 @@ import storage
 from game_catalog import display_games, get_safe_text
 
 
+# This function creates the next rental ID using the R001 sequence.
 def generate_rental_id(rentals=None):
     if rentals is None:
         rentals = storage.load_rentals()
     return storage.generate_prefixed_id("R", rentals, "rental_id")
 
 
+# This function validates a rental, collects payment, updates stock, and prints a receipt.
 def rent_game():
     try:
         games = storage.load_games()
@@ -72,6 +75,7 @@ def rent_game():
         print(f"Rental could not be completed: {error}")
 
 
+# This function marks an active rental as returned and restores the game's stock.
 def return_game():
     try:
         rentals = storage.load_rentals()
@@ -124,6 +128,7 @@ def return_game():
         print(f"Return could not be completed: {error}")
 
 
+# This function loads and displays the full rental transaction history.
 def view_rental_records():
     try:
         rentals = storage.load_rentals()

@@ -1,3 +1,4 @@
+# This module validates cash payments and displays saved payment transactions.
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from zoneinfo import ZoneInfo
@@ -5,9 +6,11 @@ from zoneinfo import ZoneInfo
 import storage
 
 
+# This timezone ensures every payment uses the local date and time in the Philippines.
 PHILIPPINE_TIME = ZoneInfo("Asia/Manila")
 
 
+# This function collects enough cash for a rental and calculates the customer's change.
 def collect_cash(amount_due):
     due = storage.normalize_money(amount_due)
     while True:
@@ -38,14 +41,17 @@ def collect_cash(amount_due):
         return {"cash_received": cash, "change": cash - due}
 
 
+# This function creates the next payment ID using the P001 sequence.
 def generate_payment_id(payments):
     return storage.generate_prefixed_id("P", payments, "payment_id")
 
 
+# This function returns the current Philippine timestamp without microseconds.
 def current_payment_time():
     return datetime.now(PHILIPPINE_TIME).replace(microsecond=0).isoformat()
 
 
+# This function builds a complete payment record after validating the cash received.
 def create_payment(
     payment_id,
     rental_id,
@@ -73,6 +79,7 @@ def create_payment(
     }
 
 
+# This function loads and displays all successful payment transactions.
 def view_payment_records():
     try:
         payments = storage.load_payments()

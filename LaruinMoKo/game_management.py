@@ -1,7 +1,9 @@
+# This module handles changes and removals in the game catalog.
 import storage
 from game_catalog import display_games, get_non_negative_int, get_positive_money, get_safe_text
 
 
+# This function repeats a confirmation question until Y or N is entered.
 def get_confirmation(prompt):
     while True:
         answer = input(prompt).strip().casefold()
@@ -12,6 +14,7 @@ def get_confirmation(prompt):
         print("Invalid input. Please enter Y or N.")
 
 
+# This function validates and saves updated details for a selected game.
 def edit_game():
     try:
         games = storage.load_games()
@@ -37,6 +40,7 @@ def edit_game():
         print(f"Unable to edit game: {error}")
 
 
+# This function deletes a game only when it has no active rental.
 def delete_game():
     try:
         games = storage.load_games()
